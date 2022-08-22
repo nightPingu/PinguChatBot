@@ -1,14 +1,25 @@
+/**
+ * Server for reciving http requests and redirects from Twitch.
+ * 
+ * Only used for aquireing token, is shut down afterwords. 
+ */
+
+
 import Fastify from 'fastify'
 import { fetchPost } from '../utils/fetch.js';
-import { Token } from '../utils/token-storage.js';
+import { Token } from '../data/token-storage.js';
+import { controllablePromise } from '../utils/util.js';
+import { AccessToken } from './types/generic.js';
 
 
+const p = controllablePromise<AccessToken>()
 let isRunning = false;
 const fastify = Fastify({
   logger: true
 })
 
-
+let debugMode = false;
+const log = (...args) =>  debugMode && console.log(...args)
 
 type AuthorizationCodeGrantFlowResponse = {
     code:  string
@@ -18,13 +29,7 @@ type AuthorizationCodeGrantFlowResponse = {
 function isAuthorizationCodeGrantFlow(queryParams:any): queryParams is AuthorizationCodeGrantFlowResponse {
     return queryParams && queryParams.code && queryParams.scope
 }
-
 fastify.get('/', async function (request, reply) {
-    console.log("-- START")
-    console.log(request.body)
-    console.log("......")
-    console.log(request.query)
-    console.log("-- END")
 
     if(isAuthorizationCodeGrantFlow(request.query)) {
         const res:any = await fetchPost('https://id.twitch.tv/oauth2/token', {
@@ -34,14 +39,16 @@ fastify.get('/', async function (request, reply) {
             grant_type:     "authorization_code",
             redirect_uri:   process.env.REDIRECT_URI
         }).then(res => res.json())
-        console.log('res', res);
-        Token.setToken({
+
+        const token = {
             accessToken: res.access_token,
             refreshToken: res.refresh_token,
             obtainmentTimestamp: Date.now(),
             scope: res.scope,
-        });
-        
+        }
+
+        Token.setToken(token);
+        p.resolve(token)
     }
     
     reply.code(200).send();
@@ -62,5 +69,7 @@ function start(port:number = 3000) {
 
 export const Server = {
     fastify,
-    start
+    start,
+    onTokenRefresh: p.promise,
+    debug: (b:boolean) => debugMode = b
 }

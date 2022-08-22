@@ -12,10 +12,11 @@ https://dev.twitch.tv/docs/irc
 <br>
 ##### TODO:
 - [ ] *Feature*: Send irc message
-- [ ] Change path were data is written to. Output data should not exsist inside src folder. 
-- [ ] If public interest, add as lib to npm.
+- [X] Change path were data is written to. Output data should not exsist inside src folder. 
+- [X] Encrypt accsess_token and refresh_token when written to disk. 
+- [ ] If public interest, add lib build and publish to npm.
+- [ ] If public interest, add unit tests.
 - [ ] Low pri: Redo types, meta/generated types are nice but work poor as documentation   
- (Example: `IrcMessageTypeHandlerMethods`)
 
 
 <br>
@@ -253,20 +254,17 @@ Must be broadcaster or mod to run the commands
 
 Download or clone repo.
 
-1. Visit Twitch Dev console to register yourself and a app to gain a CLIENT_ID and CLIENT_SECRET
+1. Visit Twitch Dev console to get CLIENT_ID and CLIENT_SECRET
 https://dev.twitch.tv/docs/authentication/register-app
-This app may assume you set  the URL to http://localhost:3000 in twitch dev console. (same value as REDIRECT_URI)
 
-1. Make a copy or rename "example-env.txt" with the name ".env".  
-Open .evn file and update values of CLIENT_ID, CLIENT_SECRET and REDIRECT_URI
-Values should be gotten from step 1.
+1. Set up `.env`.
+    - Set/update  CLIENT_ID, CLIENT_SECRET, REDIRECT_URI and BOT_USERNAME
 
-3. At first run. This should ony be required first time, afterwords it will use refresh token approch. 
-   1. Start server
-   2. get link from `createLink()`
-   3. Visit link, you should be redirected to this server, and it will store a accsess token in data/tokens.json.
-accsess token is used to read/write chat.
-   4. Restart server.
+
+2. Run project - `npm run dev:run channelName`
+     - Example: npm run dev:run twitchgaming
+3. Follow instructions as shown in terminal. 
+
 
 
 ### Docs
@@ -285,7 +283,7 @@ https://dev.twitch.tv/docs/irc#keepalive-messages
 
 #### ESM
 
-Project uses ESM due to newer libs having moved over to it.
+Project uses ESM.
 This requires some changes
 - Imports may require a suffix of `.js`.
 - `__dirname` now requires some logic. Please view the below code.

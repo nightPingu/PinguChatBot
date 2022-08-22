@@ -4,3 +4,5 @@ CLIENT_SECRET = value_with_no_quotes
 # Same value as placed in url field when registering your app when getting `Client id`.
 # localhost : port is local server or url to server if hosted 
 REDIRECT_URI = http://localhost:3000
+BOT_USERNAME = username_of_bot_account
+DEFAULT_CHANNEL_TO_JOIN = twitchgaming

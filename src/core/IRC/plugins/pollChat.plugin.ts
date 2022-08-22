@@ -143,31 +143,10 @@ export const PollChatPlugin:Plugin = {
 
         if(poll.isPolling && (map.PRIVMSG[0] == "1" || map.PRIVMSG[0] == "2")) {
             data.breakSequence = true
-            if(poll.addVote(map["display-name"], map.PRIVMSG[0])) {
+            if(poll.addVote(map["display-name"]+ ": " + map.PRIVMSG, map.PRIVMSG[0])) {
                 console.log(chalk.hex(map.color)(map["display-name"] + ": Voted " + map.PRIVMSG));
             }
         }
 
     }
 }
-
-
-/* 
-function parseResults({yes, no}:{yes:string[], no:string[]}) {
-
-    var table = [];
-    // Find largest name size.
-    var largest = Math.max([...yes,...no].reduce((n,curr) => curr.length > n ? curr.length : n, 0), 10)
-    
-    var i = 0
-    table.push(`| ${"yes".padEnd(largest, " ")} | ${"no".padEnd(largest, " ")} |`)
-    table.push(`| ${"".padEnd(largest, "-")} | ${"".padEnd(largest, "-")} |`)
-
-    while(yes.length > i || no.length > i) {
-        table.push( `| ${(yes[i] ?? " ").padEnd(largest, " ")} | ${(no[i] ?? " ").padEnd(largest, " ")} |`);
-        i++
-    }
-    table.push(`| ${("total: "+ yes.length).padEnd(largest, " ")} | ${("total: "+no.length).padEnd(largest, " ")} |`)
-
-    return table;
-} */

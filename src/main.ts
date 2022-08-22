@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 
 import { Server } from "./core/server.js";
-import { Token } from "./utils/token-storage.js";
+import { Token } from "./data/token-storage.js";
 import { IrcConnection } from "./core/IRC/ircConnection.js";
 import { LogChatToTerminal } from "./core/IRC/plugins/logChatToTerminal.plugin.js";
 import { PollChatPlugin } from "./core/IRC/plugins/pollChat.plugin.js";
@@ -9,6 +9,7 @@ import chalk from "chalk";
 import { fetchPostForm } from "./utils/fetch.js";
 import { RefreshTokenResponse, RefreshTokenResponseError, RefreshTokenResponseResult } from "./core/types/twitch.js";
 import { isType } from "./utils/util.js";
+import { printInBox } from "./utils/log.js";
 
 
 dotenv.config()
@@ -27,12 +28,18 @@ function createLink() {
 
 
 
+const args = process.argv.slice(2);
+
 (async function() {
 
-	let tokenData = await Token.getToken();
-	let tokenOwnerUsername = "";
+	// --------------------------------------------
+	// -- Load or promt user to aquire token  -----
+	// --------------------------------------------
 
-	if(tokenData?.refreshToken) {
+	let tokenData = await Token.getToken();
+	// tokenData = undefined;
+
+	if(tokenData?.refreshToken?.length > 5) {
 		// Refresh token attempt
 		const res:  RefreshTokenResponse = await fetchPostForm("https://id.twitch.tv/oauth2/token", {
 			client_id: process.env.CLIENT_ID,
@@ -56,35 +63,51 @@ function createLink() {
 		}
 
 	} else {
-		// User must visit link so we can acquired token for user.
-
-		// Use this link to generate new token for chatbot, requries restart after being acquired.
-		// Todo: Make it reconnect when we aquaire a new token. Global event for sharing data between services?
+		log("Token is missing or invalid, please follow the link given to aquire new token");
 		const server = Server;
 		server.start(3000);
-		log("****** Link for new token ******");
-		log(chalk.bgYellow.yellow(createLink()));
-		log("****** Link for new token ******");
+		printInBox(
+			{text:"****** Link for new token ******", pos:'center', transform:chalk.yellow},
+			{text:createLink(), transform: chalk.underline},
+			{text:"****** Link for new token ******", pos:'center', transform:chalk.yellow}
+		)
+		// Wait on user to visit link and get token.
+		tokenData = await server.onTokenRefresh
+		setTimeout(() => {
+			server.fastify.close();
+		}, 5 * 1000) // Allow fastify to complete any logging
 	}
 
 
-	log("Opening IrcConnection");
 
 
+	// --------------------------------------------
+	// -- Setting up IRC connection and Plugins ---
+	// --------------------------------------------
 	const irc = new IrcConnection()
-
-	
-	// Name must match with user used to get token
-	await irc.connect(tokenData, tokenOwnerUsername)
+	// Username must belong to same user access_token was aquired with.
+	await irc.connect(tokenData, process.env.BOT_USERNAME)
 
 	irc.addPlugin(LogChatToTerminal)
 	irc.addPlugin(PollChatPlugin)
 
-	// Connects to channel
-	const channelName = ""
+
+
+	// --------------------------------------------
+	// -- Connecting to Channel -------------------
+	// --------------------------------------------
+
+	if(!args[0]) {
+		log("Please pass argument for the chennel you want to visit, Example: `npm run dev:run channelName` ")
+	}
+	const channelName = args[0] ?? process.env.DEFAULT_CHANNEL_TO_JOIN ?? "twitchgaming"
+	log("Connecting to "+ (!!args[0] ? ' selected channel' : ' default channel'), channelName)
 	irc.joinChannel(channelName)
 	log("Connected");
 
 
 
 })().catch(console.error);
+
+
+

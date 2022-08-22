@@ -9,6 +9,7 @@ import { AccessToken } from "../core/types/generic";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const outputFolder = path.join(__dirname, "..", "..", "out");
 
 export const DataStorage = {
 
@@ -20,7 +21,7 @@ export const DataStorage = {
             pathToData = pathToData+".json"
         }
         return fs.readFile(
-            path.join(__dirname, pathToData),
+            path.join(outputFolder, pathToData),
             {encoding: 'utf-8'}
          ).then(s => JSON.parse(s))
     },
@@ -34,17 +35,11 @@ export const DataStorage = {
         }
         if(mkDir) {
             const startOfFilename = pathToData.lastIndexOf("/")
-            const folder = pathToData.slice(0, startOfFilename);
-            console.log('folder', folder);
-            
-            const folderExsists = fsSync.existsSync(path.join(__dirname, folder))
-            console.log('folderExsists', folderExsists);
+            const folder = pathToData.slice(0, startOfFilename);            
+            const folderExsists = fsSync.existsSync(path.join(outputFolder, folder))
             if(!folderExsists) {
-                const mkdir = await fs.mkdir(path.join(__dirname, folder), { recursive: true })
-                console.log('mkdir', mkdir);
-
+                const mkdir = await fs.mkdir(path.join(outputFolder, folder), { recursive: true })
             }
-
         }
         let json;
         if (typeof body.toJson === 'function') {
@@ -57,7 +52,7 @@ export const DataStorage = {
         }
 
         fs.writeFile(
-            path.join(__dirname, pathToData),
+            path.join(outputFolder, pathToData),
             json,
             {encoding: 'utf-8'}
         )
