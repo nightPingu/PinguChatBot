@@ -1,0 +1,29 @@
+{
+  "name": "PinguChatBot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.ts",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev:run": "ts-node --esm ./src/main.ts",
+    "dev:watch": "nodemon ./src/main.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.2",
+    "@types/node": "^8.5.3",
+    "@types/ws": "^8.5.3",
+    "nodemon": "^2.0.19",
+    "ts-node": "^10.9.1"
+  },
+  "dependencies": {
+    "typescript": "^4.7.4",
+    "chalk": "^5.0.1",
+    "dotenv": "^16.0.1",
+    "fastify": "^4.5.2",
+    "ws": "^8.8.1"
+  }
+}

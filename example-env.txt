@@ -1,0 +1,6 @@
+# Guide for getting an `Client id` and `Secret id` view https://dev.twitch.tv/docs/api/get-started 
+CLIENT_ID = value_with_no_quotes
+CLIENT_SECRET = value_with_no_quotes
+# Same value as placed in url field when registering your app when getting `Client id`.
+# localhost : port is local server or url to server if hosted 
+REDIRECT_URI = http://localhost:3000
